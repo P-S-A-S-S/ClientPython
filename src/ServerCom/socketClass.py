@@ -1,5 +1,5 @@
-import socket
-
+import socket, json
+from src.ClientSide.saveId import saveId
 class MySocket:
 
     def __init__(self, sock=None):
@@ -29,6 +29,13 @@ class MySocket:
                 raise RuntimeError("socket connection broken get")
             chunks.append(chunk)
             bytes_recd = bytes_recd + len(chunk)
-            if chunk == b'Mensaje del servidor':
-                self.mysend(b'Elpepe')
+            try:
+                str_data = chunk.decode('utf-8')
+                print(str_data)
+                Query = json.loads(str_data)
+                print(Query)
+                if Query["id"]:
+                    saveId(str(Query["id"]))
+            except Exception as e:
+                print(e)
         return b''.join(chunks)
