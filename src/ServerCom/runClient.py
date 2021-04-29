@@ -5,10 +5,9 @@ def startClient():
     socketClient = MySocket()
     socketClient.connect("127.0.0.1", 1234)
     clientId = getId()
-    print(clientId)
     if clientId == False:
-        socketClient.mysend(b'{"head":{"id":0},"body":{"message":"hello Pauet"}}')
+        socketClient.mysend(b'{"head":{"id":0},"body":{"message":"Id Request"}}')
     else:
         hiQuery = '{"head":{"id":%s},"body":{"message":"NewClientConnection"}}' %(clientId)
         socketClient.mysend(hiQuery.encode(encoding='UTF-8'))
-    socketClient.myreceive()
+    socketClient.myreceive(clientId)

@@ -4,4 +4,4 @@ def saveId(id):
         with open(pathToIdFile, 'w') as writer:
             writer.write(id)
     except OSError as e:
-        print(e)
+        print("Error saving ID: ",e)

@@ -1,5 +1,6 @@
 import socket, json
-from src.ClientSide.saveId import saveId
+from src.ServerCom.callManager import callManager
+from src.ClientSide.getId import getId
 class MySocket:
 
     def __init__(self, sock=None):
@@ -20,7 +21,7 @@ class MySocket:
                 break
             totalsent = totalsent + sent
 
-    def myreceive(self):
+    def myreceive(self, clientId):
         chunks = []
         bytes_recd = 0
         while True:
@@ -31,11 +32,12 @@ class MySocket:
             bytes_recd = bytes_recd + len(chunk)
             try:
                 str_data = chunk.decode('utf-8')
-                print(str_data)
                 Query = json.loads(str_data)
-                print(Query)
-                if Query["id"]:
-                    saveId(str(Query["id"]))
+                print("Query from server: ",Query)
+                response = callManager(Query, self, clientId)
+                print(response)
+                if response == "Id saved":
+                    clientId = getId()
             except Exception as e:
                 print(e)
         return b''.join(chunks)
