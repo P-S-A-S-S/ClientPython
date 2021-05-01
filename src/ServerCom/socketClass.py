@@ -32,6 +32,7 @@ class MySocket:
             bytes_recd = bytes_recd + len(chunk)
             try:
                 str_data = chunk.decode('utf-8')
+                print("Normal data: ",str_data)
                 Query = json.loads(str_data)
                 print("Query from server: ",Query)
                 response = callManager(Query, self, clientId)
