@@ -4,6 +4,7 @@ from src.ClientSide.getId import getId
 def startClient():
     socketClient = MySocket()
     socketClient.connect("127.0.0.1", 1234)
+    print("Connected successfully!")
     clientId = getId()
     if clientId == False:
         socketClient.mysend(b'{"head":{"id":0},"body":{"message":"Id Request"}}')
