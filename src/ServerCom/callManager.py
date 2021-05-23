@@ -1,8 +1,9 @@
 from src.ClientSide.saveId import saveId
 from src.ClientSide.execCommand import execCommand
-from src.ServerCom.encryptData import encryptData
+from src.ServerCom.encryptData import encryptData, symEncrypt
 
-def callManager(Query, socket, clientId, str_key):
+def callManager(Query, socket, clientId, str_key, sym_key):
+    print("Command from server: ", Query)
     if "id" in Query:
         saveId(str(Query["id"]))
         returnQuery = '{"head":{"id":"%s"},"body":{"message":"Id saved successfully"}}' %(Query["id"])
@@ -17,7 +18,9 @@ def callManager(Query, socket, clientId, str_key):
             output = execCommand(Query["command"])
             output = output.replace("\n", "\\n")
             returnQuery = '{"head":{"id":"%s"},"body":{"message":"Command executed", "command":"%s", "output":"%s"}}' %(clientId, Query["command"], output)
-            socket.mysend(encryptData(str_key, returnQuery))
+            print("symKeyTest: ", sym_key)
+            encrQuery = symEncrypt(sym_key, returnQuery.encode('utf-8'))
+            socket.mysend(encrQuery)
             return "Comanda del servidor"
     else:
         return "None executed"

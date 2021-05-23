@@ -1,7 +1,7 @@
 import socket, json
 from src.ServerCom.callManager import callManager
 from src.ClientSide.getId import getId
-from src.ServerCom.encryptData import encryptData
+from src.ServerCom.encryptData import encryptData, genKey, symDecrypt, symEncrypt
 
 class MySocket:
 
@@ -27,9 +27,13 @@ class MySocket:
         chunks = []
         bytes_recd = 0
         str_key = []
+        sym_key = []
         while True:
-            chunk = self.sock.recv(min(1024 - bytes_recd, 2048))
+            #chunk = self.sock.recv(min(1024 - bytes_recd, 2048))
+            chunk = self.sock.recv(1024)
             if chunk == b'':
+                print("Dead chunk: ",chunk)
+                self.sock.close()
                 raise RuntimeError("socket connection broken get")
             chunks.append(chunk)
             bytes_recd = bytes_recd + len(chunk)
@@ -42,21 +46,27 @@ class MySocket:
                 except:
                     isKey = False
 
-                if isKey and clientId != False:
+                if isKey:
                     str_key.append(str_data)
-                    hiQuery = '{"head":{"id":"%s"},"body":{"message":"NewClientConnection"}}' %(clientId)
-                    encryptedData = encryptData(str_data, hiQuery)
-                    self.mysend(encryptedData)
-                elif isKey and clientId == False:
-                    str_key.append(str_data)
-                    hiQuery = hiQuery = '{"head":{"id":0},"body":{"message":"Id Request"}}'
-                    encryptedData = encryptData(str_data, hiQuery)
-                    self.mysend(encryptedData)
+                    sym_key.append(genKey())
+                    encryptedKey = encryptData(str_key[0], sym_key[0].decode('utf-8'))
+                    self.mysend(encryptedKey)
+                    if  clientId != False:
+                        #str_key.append(str_data)
+                        hiQuery = '{"head":{"id":"%s"},"body":{"message":"NewClientConnection"}}' %(clientId)
+                        encryptedData = symEncrypt(sym_key[0], hiQuery.encode('utf-8'))
+                        self.mysend(encryptedData)
+                    elif clientId == False:
+                        #str_key.append(str_data)
+                        hiQuery = hiQuery = '{"head":{"id":0},"body":{"message":"Id Request"}}'
+                        encryptedData = symEncrypt(sym_key[0], hiQuery.encode('utf-8'))
+                        self.mysend(encryptedData)
+
                 else:
-                    Query = json.loads(str_data)
-                    print("Query from server: ",Query)
-                    response = callManager(Query, self, clientId, str_key[0])
-                    print(response)
+                    decrypt = symDecrypt(sym_key[0], str_data.encode('utf-8'))
+                    print("Encrpyed from server: ", str_data.encode('utf-8'))
+                    Query = json.loads(decrypt)
+                    response = callManager(Query, self, clientId, str_key[0], sym_key[0])
                     if response == "Id saved":
                         clientId = getId()
             except Exception as e:
