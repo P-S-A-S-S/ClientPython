@@ -4,7 +4,7 @@ from src.ServerCom.encryptData import encryptData
 
 def startClient():
     socketClient = MySocket()
-    socketClient.connect("127.0.0.1", 1234)
+    socketClient.connect("129.159.207.221", 1234)
     print("Connected successfully!")
     clientId = getId()
     hiQuery = 'get public key'
