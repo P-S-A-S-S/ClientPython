@@ -7,7 +7,8 @@ def callManager(Query, socket, clientId, str_key, sym_key):
     if "id" in Query:
         saveId(str(Query["id"]))
         returnQuery = '{"head":{"id":"%s"},"body":{"message":"Id saved successfully"}}' %(Query["id"])
-        socket.mysend(encryptData(str_key, returnQuery))
+        encrQuery = symEncrypt(sym_key, returnQuery.encode('utf-8'))
+        socket.mysend(encrQuery)
         if clientId == False:
             clientId = Query["id"]
         return "Id saved"
